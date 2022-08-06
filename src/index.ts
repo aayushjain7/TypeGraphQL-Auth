@@ -5,7 +5,6 @@ import { buildSchema } from "type-graphql";
 import { createConnection } from "typeorm";
 import session from "express-session";
 import connectRedis from "connect-redis";
-// import cors from "cors";
 
 import { redis } from "./redis";
 import { RegisterResolver } from "./modules/user/Register";
@@ -18,6 +17,9 @@ const main = async () => {
 	await createConnection();
 	const schema = await buildSchema({
 		resolvers: [MeResolver, RegisterResolver, LoginResolver],
+		authChecker: ({ context: { req } }) => {
+			return !!req.session.userId;
+		},
 	});
 
 	const apolloServer = new ApolloServer({
