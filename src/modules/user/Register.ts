@@ -5,7 +5,7 @@ import { RegisterInput } from "./register/RegisterInput";
 import { isAuth } from "../middleware/isAuth";
 import { logger } from "../middleware/Logger";
 import { sendEmail } from "../utils/sendEmail";
-import { createConfirmationUrl } from "../utils/createConfirmationUrl";
+import { createConfirmationUrl } from "../utils/createEmailUrl";
 
 @Resolver()
 export class RegisterResolver {
