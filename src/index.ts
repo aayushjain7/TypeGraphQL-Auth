@@ -1,38 +1,18 @@
 import "reflect-metadata";
 import { ApolloServer } from "apollo-server-express";
 import express, { Express } from "express";
-import { buildSchema } from "type-graphql";
 import { createConnection } from "typeorm";
 import session from "express-session";
 import connectRedis from "connect-redis";
 
 import { redis } from "./redis";
-import { RegisterResolver } from "./modules/user/Register";
-import { LoginResolver } from "./modules/user/Login";
-import { MeResolver } from "./modules/user/Me";
-import { ConfirmUserResolver } from "./modules/user/ConfirmUser";
-import { ForgotPasswordResolver } from "./modules/user/ForgotPassword";
-import { ChangePasswordResolver } from "./modules/user/ChangePassword";
-import { LogoutResolver } from "./modules/user/Logout";
+import { createSchema } from "./utils/createSchema";
 
 const main = async () => {
 	const isProduction = process.env.NODE_ENV === "production";
 
 	await createConnection();
-	const schema = await buildSchema({
-		resolvers: [
-			MeResolver,
-			RegisterResolver,
-			LoginResolver,
-			ConfirmUserResolver,
-			ForgotPasswordResolver,
-			ChangePasswordResolver,
-			LogoutResolver,
-		],
-		authChecker: ({ context: { req } }) => {
-			return !!req.session.userId;
-		},
-	});
+	const schema = await createSchema();
 
 	const apolloServer = new ApolloServer({
 		schema,
