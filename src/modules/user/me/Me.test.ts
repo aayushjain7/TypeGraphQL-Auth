@@ -13,55 +13,52 @@ afterAll(async () => {
 	await conn.close();
 });
 
-const registerMutation = `
-mutation Register(
-  $password: String!
-  $email: String!
-  $lastName: String!
-  $firstName: String!
-) {
-  register(
-    data: {
-      password: $password
-      email: $email
-      lastName: $lastName
-      firstName: $firstName
-    }
-  ) {
+const meQuery = `
+query Me{
+  me {
     id
-    email
     firstName
     lastName
+    email
+    name
   }
 }
 `;
 
-describe("Register", () => {
-	it("create user", async () => {
-		const user = {
+describe("Me", () => {
+	it("get user", async () => {
+		const user = await User.create({
 			password: faker.internet.password(),
 			email: faker.internet.email(),
 			lastName: faker.name.lastName(),
 			firstName: faker.name.firstName(),
-		};
+		}).save();
 		const response = await gCall({
-			source: registerMutation,
-			variableValues: user,
+			source: meQuery,
+			userId: user.id,
+		});
+		console.log(response);
+		expect(response).toMatchObject({
+			data: {
+				me: {
+					id: `${user.id}`,
+					firstName: user.firstName,
+					lastName: user.lastName,
+					email: user.email,
+				},
+			},
+		});
+	});
+
+	it("return null", async () => {
+		const response = await gCall({
+			source: meQuery,
 		});
 
 		expect(response).toMatchObject({
 			data: {
-				register: {
-					email: user.email,
-					firstName: user.firstName,
-					lastName: user.lastName,
-				},
+				me: null,
 			},
 		});
-
-		const dbUser = await User.findOne({ where: { email: user.email } });
-		expect(dbUser).toBeDefined();
-		expect(dbUser!.confirmed).toBeFalsy();
-		expect(dbUser!.firstName).toBe(user.firstName);
 	});
 });
