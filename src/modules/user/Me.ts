@@ -5,7 +5,7 @@ import { User } from "../../entity/User";
 
 @Resolver()
 export class MeResolver {
-	@Query(() => User, { nullable: true })
+	@Query(() => User, { nullable: true, complexity: 6 })
 	async me(@Ctx() ctx: MyContext): Promise<User | null> {
 		if (!ctx.req.session.userId) {
 			return null;
